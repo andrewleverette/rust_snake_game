@@ -7,6 +7,7 @@ use crate::draw::draw_block;
 
 const SNAKE_COLOR: Color = [0.0, 0.80, 0.0, 1.0];
 
+#[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -25,6 +26,7 @@ impl Direction {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Block {
     x: i32,
     y: i32,
@@ -72,26 +74,55 @@ impl Snake {
         let (x, y) = self.head_position();
 
         let new_block = match self.direction {
-            Direction::Up => Block {
-                x,
-                y: y - 1,
-            },
-            Direction::Down => Block {
-                x,
-                y: y + 1,
-            },
-            Direction::Left => Block {
-                x: x - 1,
-                y,
-            },
-            Direction::Right => Block {
-                x: x + 1,
-                y,
-            },
+            Direction::Up => Block { x, y: y - 1 },
+            Direction::Down => Block { x, y: y + 1 },
+            Direction::Left => Block { x: x - 1, y },
+            Direction::Right => Block { x: x + 1, y },
         };
 
         self.body.push_front(new_block);
         let removed_block = self.body.pop_back().unwrap();
         self.tail = Some(removed_block);
+    }
+
+    pub fn head_direction(&self) -> Direction {
+        self.direction
+    }
+
+    pub fn next_head(&self, direction: Option<Direction>) -> (i32, i32) {
+        let (x, y) = self.head_position();
+
+        let moving_direction = match direction {
+            Some(dir) => dir,
+            None => self.direction,
+        };
+
+        match moving_direction {
+            Direction::Up => (x, y - 1),
+            Direction::Down => (x, y + 1),
+            Direction::Left => (x - 1, y),
+            Direction::Right => (x + 1, y),
+        }
+    }
+
+    pub fn restore_tail(&mut self) {
+        if let Some(block) = self.tail.clone() {
+            self.body.push_back(block);
+        }
+    }
+
+    pub fn collision(&self, x: i32, y: i32) -> bool {
+        let mut tail = 0;
+        for block in &self.body {
+            if x == block.x && y == block.y {
+                return true;
+            }
+
+            tail += 1;
+            if tail == self.body.len() - 1 {
+                break;
+            }
+        }
+        return false;
     }
 }

@@ -12,6 +12,11 @@ pub fn to_coord(x: i32, y: i32) -> (f64, f64) {
     (scaled_x, scaled_y)
 }
 
+pub fn to_coord_u32(x: i32, y: i32) -> (u32, u32) {
+    let (x, y) = to_coord(x, y);
+    (x as u32, y as u32)
+}
+
 pub fn draw_block(x: i32, y: i32, color: Color, ctx: &Context, g: &mut G2d) {
     let (x, y) = to_coord(x, y);
 
